@@ -22,13 +22,10 @@ echo "Setting permissions on Docker GPG key..."
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
 # Add Docker repository
-echo "Adding Docker repository..."
-VERSION_CODENAME=$(. /etc/os-release && echo "$VERSION_CODENAME")
-ARCH=$(dpkg --print-architecture)
-echo "deb [arch=${ARCH} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu ${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# Update the apt package index again with the new repository
-echo "Updating package index after adding Docker repository..."
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
 
 # Install Docker Engine and related packages
