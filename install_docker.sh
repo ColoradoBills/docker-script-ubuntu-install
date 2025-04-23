@@ -33,7 +33,7 @@ sudo apt-get update
 
 # Install Docker Engine and related packages
 echo "Installing Docker Engine and related packages..."
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # Add the current user to the docker group
 echo "Adding $USER to the docker group..."
