@@ -13,12 +13,10 @@ sudo apt-get install -y ca-certificates curl
 echo "Creating directory /etc/apt/keyrings..."
 sudo install -m 0755 -d /etc/apt/keyrings
 
-# Download Docker’s official GPG key
-echo "Downloading Docker GPG key..."
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-
-# Set proper permissions on the key
-echo "Setting permissions on Docker GPG key..."
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
 # Add Docker repository
