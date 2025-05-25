@@ -37,7 +37,7 @@ newgrp docker
 
 # Enable Docker services to start on boot
 echo "Enabling Docker and containerd services..."
-sudo systemctl enable docker.service
-sudo systemctl enable containerd.service
+sudo systemctl disable docker.service
+sudo systemctl disable containerd.service
 
 echo "Docker installation complete!"
