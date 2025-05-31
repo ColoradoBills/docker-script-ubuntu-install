@@ -1,43 +1,62 @@
 #!/bin/bash
-set -e  # Exit immediately if any command fails
+set -e
+#
+# install_docker.sh
+# -----------------
+# Installs Docker Engine, Docker CLI, and the Docker Compose plugin
+# on a Debian/Ubuntu host.  Must be run as root (or via sudo).
+#
 
-# Update the apt package index
-echo "Updating package index..."
-sudo apt-get update
+echo "=> Updating package index..."
+apt-get update
 
-# Install required packages
-echo "Installing ca-certificates and curl..."
-sudo apt-get install -y ca-certificates curl
+echo "=> Installing prerequisites (ca-certificates, curl, gnupg)..."
+apt-get install -y \
+    ca-certificates \
+    curl \
+    gnupg
 
-# Create the directory for apt keyrings
-echo "Creating directory /etc/apt/keyrings..."
-sudo install -m 0755 -d /etc/apt/keyrings
+echo "=> Creating /etc/apt/keyrings (if it doesn't already exist)..."
+install -m 0755 -d /etc/apt/keyrings
 
-sudo apt-get update
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
+echo "=> Downloading Docker’s official GPG key..."
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+    -o /etc/apt/keyrings/docker.gpg
 
-# Add Docker repository
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
+chmod a+r /etc/apt/keyrings/docker.gpg
 
-# Install Docker Engine and related packages
-echo "Installing Docker Engine and related packages..."
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+echo "=> Adding Docker’s APT repository..."
+# This uses the correct UBUNTU_CODENAME (e.g. "focal", "jammy", etc.)
+ARCH="$(dpkg --print-architecture)"
+. /etc/os-release
+DISTRO_CODENAME="${UBUNTU_CODENAME:-$VERSION_CODENAME}"
 
-# Add the current user to the docker group
-echo "Adding $USER to the docker group..."
-sudo usermod -aG docker $USER
-newgrp docker
+echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $DISTRO_CODENAME stable" \
+    | tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Enable Docker services to start on boot
-echo "Enabling Docker and containerd services..."
-sudo systemctl disable docker.service
-sudo systemctl disable containerd.service
+echo "=> Updating package index after adding Docker repository..."
+apt-get update
 
-echo "Docker installation complete!"
+echo "=> Installing Docker Engine, CLI, containerd, buildx, and the Docker Compose plugin..."
+apt-get install -y \
+    docker-ce \
+    docker-ce-cli \
+    containerd.io \
+    docker-buildx-plugin \
+    docker-compose-plugin
+
+echo "=> Adding the current user ($SUDO_USER) to the docker group..."
+# If $SUDO_USER is empty (script run as root directly), fallback to $USER.
+TARGET_USER="${SUDO_USER:-$USER}"
+usermod -aG docker "$TARGET_USER"
+
+echo "=> Enabling Docker services at boot..."
+systemctl enable docker.service
+systemctl enable containerd.service
+
+echo
+echo "Docker installation is complete!"
+echo "  • If you added yourself to the 'docker' group, log out and log back in"
+echo "    (or run 'newgrp docker') so that 'docker' commands work without sudo."
+echo "  • Verify with:   docker --version   and   docker compose version"
