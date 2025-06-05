@@ -1,10 +1,6 @@
 #!/bin/bash
 set -e
 
-# Docker Installer Script
-# For: Debian/Ubuntu systems (incl. Ubuntu 24.04 via noble fallback)
-# Usage: sudo ./install_docker.sh
-
 echo "==> [1/7] Updating package index..."
 apt-get update -qq
 
@@ -19,24 +15,14 @@ echo "==> [3/7] Creating keyrings directory..."
 install -m 0755 -d /etc/apt/keyrings
 
 echo "==> [4/7] Adding Docker's official GPG key (dearmored)..."
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-    gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 chmod a+r /etc/apt/keyrings/docker.gpg
 
-echo "==> [5/7] Setting up Docker repository..."
-
+echo "==> [5/7] Setting up Docker repository using 'noble' codename..."
 ARCH=$(dpkg --print-architecture)
-. /etc/os-release
+CODENAME="noble"  # Force noble since 'plucky' is not supported yet
 
-# Fallback to 'noble' for unsupported Ubuntu 24.04 ("plucky")
-CODENAME="${VERSION_CODENAME:-$(lsb_release -cs)}"
-if [ "$CODENAME" = "plucky" ]; then
-  echo "!! 'plucky' not yet supported by Docker. Using 'noble' instead."
-  CODENAME="noble"
-fi
-
-echo \
-  "deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" \
+echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" \
   > /etc/apt/sources.list.d/docker.list
 
 echo "==> [6/7] Updating package index with Docker packages..."
