@@ -20,3 +20,11 @@ This script installs Docker Engine and Docker Compose (via plugin) on Ubuntu.
    curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/install-docker.sh -o install-docker.sh
    chmod +x install-docker.sh
    ./install-docker.sh
+   ```
+2.	After installation, log out and log back in or run:
+     ```bash
+       newgrp docker
+     ```
+
+## 📚 References
+  - Docker Docs: https://docs.docker.com/engine/install/ubuntu/
